@@ -2,41 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Emotion Detector</title>
 
-  <!-- TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.3.0/dist/tf.min.js"></script>
+  <!-- Phải load TensorFlow.js trước -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.5"></script>
 
-  <!-- Teachable Machine Image library -->
+  <!-- Sau đó mới load Teachable Machine -->
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-
-    canvas {
-      margin-top: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    #label-container {
-      font-size: 20px;
-      font-weight: bold;
-      margin-top: 15px;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    canvas { margin-top: 10px; }
+    button { padding: 10px 20px; font-size: 16px; }
+    #label-container { font-size: 20px; font-weight: bold; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -52,25 +30,29 @@
       const modelURL = "model.json";
       const metadataURL = "metadata.json";
 
-      // Load the model and metadata
       model = await tmImage.load(modelURL, metadataURL);
       maxPredictions = model.getTotalClasses();
 
-      // Setup webcam
-      webcam = new tmImage.Webcam(400, 300, true); // width, height, flip
-      await webcam.setup(); // request access
+      webcam = new tmImage.Webcam(400, 300, true);
+      await webcam.setup();
       await webcam.play();
       window.requestAnimationFrame(loop);
 
-      // Append webcam to DOM
       document.getElementById("webcam-canvas").replaceWith(webcam.canvas);
       labelContainer = document.getElementById("label-container");
     }
 
     async function loop() {
-      webcam.update(); // update the webcam frame
+      webcam.update();
       await predict();
       window.requestAnimationFrame(loop);
     }
 
     async function predict() {
+      const prediction = await model.predict(webcam.canvas);
+      prediction.sort((a, b) => b.probability - a.probability);
+      labelContainer.innerHTML = `${prediction[0].className}: ${(prediction[0].probability * 100).toFixed(2)}%`;
+    }
+  </script>
+</body>
+</html>
