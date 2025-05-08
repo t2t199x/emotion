@@ -2,26 +2,31 @@
 <html>
 <head>
   <title>Emotion Detector</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 </head>
 <body>
   <h1>Emotion Recognition</h1>
   <button type="button" onclick="init()">Start Camera</button>
-  <div><canvas id="webcam-canvas" width="400" height="300"></canvas></div>
+  <div>
+    <canvas id="webcam-canvas" width="400" height="300"></canvas>
+  </div>
   <h2 id="label-container">Loading...</h2>
 
   <script type="text/javascript">
     let model, webcam, labelContainer, maxPredictions;
 
     async function init() {
-      const modelURL = "model.json";
-      const metadataURL = "metadata.json";
+      const URL = "https://t2t199x.github.io/emotion/"; // <-- Đường dẫn đến GitHub Pages
+      const modelURL = URL + "model.json";
+      const metadataURL = URL + "metadata.json";
 
       model = await tmImage.load(modelURL, metadataURL);
       maxPredictions = model.getTotalClasses();
 
       webcam = new tmImage.Webcam(400, 300, true);
-      await webcam.setup(); // yêu cầu quyền truy cập webcam
+      await webcam.setup(); // xin quyền truy cập webcam
       await webcam.play();
       window.requestAnimationFrame(loop);
 
@@ -38,7 +43,8 @@
     async function predict() {
       const prediction = await model.predict(webcam.canvas);
       prediction.sort((a, b) => b.probability - a.probability);
-      labelContainer.innerHTML = `${prediction[0].className}: ${(prediction[0].probability * 100).toFixed(2)}%`;
+      labelContainer.innerHTML =
+        `${prediction[0].className}: ${(prediction[0].probability * 100).toFixed(2)}%`;
     }
   </script>
 </body>
